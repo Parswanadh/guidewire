@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Playwright and Test Results
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/

@@ -1,52 +1,32 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Playwright configuration for E2E testing
- * @see https://playwright.dev/docs/test-configuration
- */
 export default defineConfig({
-  testDir: "./tests/e2e",
-  fullyParallel: false, // Run tests serially to avoid localStorage conflicts
+  testDir: './tests/e2e',
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1, // Single worker to avoid state sharing
-  reporter: "html",
-
-  // Global setup to ensure clean state for all tests
-  globalSetup: "./tests/e2e/global-setup.ts",
-
-  // Global teardown to clean up after all tests
-  globalTeardown: "./tests/e2e/global-teardown.ts",
-
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
   use: {
-    baseURL: "http://localhost:5173",
-    trace: "on-first-retry",
-    screenshot: "only-on-failure",
-    // Clear all storage state before each test
-    // This ensures each test starts with a completely fresh browser context
-    contextOptions: {
-      // Don't load any existing storage state
-      storageState: undefined,
-      // Set strict test isolation mode
-      strictSelectors: false,
-    },
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
 
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: "Mobile Chrome",
-      use: { ...devices["Pixel 5"] },
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'], viewport: { width: 430, height: 932 } },
     },
   ],
 
-  // Start dev server before running tests
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:5173",
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
