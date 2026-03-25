@@ -16,6 +16,8 @@ const triggerIcons = {
   Internet: Wifi,
   Fuel: Fuel,
   Incentive: TrendingDown,
+  Wind: Wind,
+  Hail: CloudRain,
 } as const;
 
 const statusVariants = {

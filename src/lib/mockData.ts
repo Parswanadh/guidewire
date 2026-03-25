@@ -1,4 +1,8 @@
 // ShieldRide Mock Data - Based on Strategic Doc
+import { addDays, subDays, format, startOfToday } from 'date-fns';
+
+const today = startOfToday();
+
 export interface MockUser {
   id: string;
   name: string;
@@ -7,8 +11,9 @@ export interface MockUser {
   darkStore: string;
   zone: string;
   activeSince: string;
+  activeSincePetti: string;
+  latestOrderDelivered: string;
   expiresOn: string;
-  todayEarnings: number;
   coverageAmount: number;
   shieldStatus: {
     active: boolean;
@@ -27,17 +32,17 @@ export interface PlanConfig {
 
 export const COVERAGE_TIERS: Record<CoverageTier, PlanConfig> = {
   basic: {
-    dailyRate: 6, // Approx per day
+    dailyRate: 6,
     dailyCoverage: 150,
     triggers: ['Rainfall', 'Heat', 'AQI', 'Platform', 'Internet', 'Fuel', 'Incentive'],
   },
   standard: {
-    dailyRate: 9, // ₹63/week / 7
+    dailyRate: 9,
     dailyCoverage: 250,
     triggers: ['Rainfall', 'Heat', 'AQI', 'Platform', 'Internet', 'Fuel', 'Incentive'],
   },
   premium: {
-    dailyRate: 12, // ₹84/week / 7
+    dailyRate: 12,
     dailyCoverage: 400,
     triggers: ['Rainfall', 'Heat', 'AQI', 'Platform', 'Internet', 'Fuel', 'Incentive'],
   },
@@ -50,9 +55,10 @@ export const MOCK_USER: MockUser = {
   partnerId: 'BLK-BLR-047',
   darkStore: 'BLK-BLR-047, Koramangala',
   zone: 'Koramangala 4th Block',
-  activeSince: 'Jan 15, 2025',
-  expiresOn: 'Mar 27, 2026',
-  todayEarnings: 140,
+  activeSince: format(subDays(today, 45), 'MMM dd, yyyy'),
+  activeSincePetti: '08:30 AM',
+  latestOrderDelivered: '10:15 AM',
+  expiresOn: format(addDays(today, 7), 'MMM dd, yyyy'),
   coverageAmount: 250,
   shieldStatus: {
     active: true,
@@ -63,7 +69,7 @@ export const MOCK_USER: MockUser = {
 
 export interface Trigger {
   id: string;
-  type: 'Rainfall' | 'Heat' | 'AQI' | 'Platform' | 'Internet' | 'Fuel' | 'Incentive';
+  type: 'Rainfall' | 'Heat' | 'AQI' | 'Platform' | 'Internet' | 'Fuel' | 'Incentive' | 'Wind' | 'Hail';
   status: 'active' | 'pending' | 'resolved' | 'warning';
   intensity: string;
   payout: number;
@@ -83,12 +89,21 @@ export const MOCK_TRIGGERS: Trigger[] = [
   },
   {
     id: 'TRG_002',
-    type: 'Platform',
+    type: 'Wind',
     status: 'resolved',
-    intensity: '60 min downtime',
-    payout: 250,
+    intensity: '45km/h',
+    payout: 120,
     timestamp: 'Yesterday',
-    description: 'Blinkit platform downtime detected at BLK-BLR-047.',
+    description: 'High wind speeds detected. Parametric safety payout credited.',
+  },
+  {
+    id: 'TRG_003',
+    type: 'Heat',
+    status: 'resolved',
+    intensity: '42°C',
+    payout: 150,
+    timestamp: '2 days ago',
+    description: 'Extreme heat warning. Health & safety payout credited.',
   },
 ];
 
@@ -112,11 +127,19 @@ export const MOCK_CLAIMS: Claim[] = [
   },
   {
     id: 'SHR-2026-04468',
-    triggerType: 'Platform Outage',
-    amount: 250,
+    triggerType: 'High Wind',
+    amount: 120,
     status: 'credited',
     date: 'Yesterday',
-    description: '100% daily coverage for hub downtime.',
+    description: 'Safety payout for 45km/h wind speed.',
+  },
+  {
+    id: 'SHR-2026-04465',
+    triggerType: 'Heat Wave',
+    amount: 150,
+    status: 'credited',
+    date: '2 days ago',
+    description: 'Extreme heat protection payout.',
   },
 ];
 
@@ -129,6 +152,13 @@ export const INSURER_METRICS = {
   reserveAmount: 112000,
   projectedReserve: 154000,
   fraudScoreAvg: 14,
+  claimsByType: [
+    { type: 'Rainfall', count: 8420, amount: 1515600 },
+    { type: 'Heat', count: 3200, amount: 480000 },
+    { type: 'Platform', count: 2100, amount: 525000 },
+    { type: 'Wind', count: 1200, amount: 144000 },
+    { type: 'AQI', count: 500, amount: 75000 },
+  ]
 };
 
 export interface FraudAlert {
@@ -147,7 +177,7 @@ export const FRAUD_ALERTS: FraudAlert[] = [
     userName: 'Ravi Kumar',
     riskLevel: 'low',
     score: 14,
-    timestamp: '2026-03-20T08:48:00',
+    timestamp: format(subDays(today, 0), "yyyy-MM-dd'T'08:48:00"),
     claimId: 'SHR-2026-04471',
     reasons: ['GPS within 180m of store', 'Network degradation detected (Proof of outdoor)'],
   },
@@ -156,7 +186,7 @@ export const FRAUD_ALERTS: FraudAlert[] = [
     userName: 'Unknown Partner',
     riskLevel: 'high',
     score: 81,
-    timestamp: '2026-03-20T09:14:00',
+    timestamp: format(subDays(today, 0), "yyyy-MM-dd'T'09:14:00"),
     claimId: 'SHR-2026-09921',
     reasons: ['Static coordinates for 2 hours', 'Ring Detection: Triggered (8 simultaneous)'],
   },

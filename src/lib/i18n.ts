@@ -80,6 +80,8 @@ export interface I18nStrings {
   Internet: string;
   Fuel: string;
   Incentive: string;
+  Wind: string;
+  Hail: string;
 
   // Location
   detectLocation: string;
@@ -111,10 +113,21 @@ export interface I18nStrings {
   shieldPaused: string;
   yourShield: string;
   activeSince: string;
+  activeSincePetti: string;
+  latestOrderDelivered: string;
   expiresOn: string;
   daysRemaining: string;
   todaysEarnings: string;
   coverageAmount: string;
+  loginNote: string;
+
+  // Policy Explanation
+  policyTitle: string;
+  policyExplanation: string;
+  severity: string;
+  payoutAmount: string;
+  simulationTitle: string;
+  understandPolicy: string;
 
   // Voice Assistant
   voiceAssistant: string;
@@ -234,6 +247,8 @@ const TRANSLATIONS: Record<LanguageCode, I18nStrings> = {
     Internet: 'Internet Outage',
     Fuel: 'Fuel Surge',
     Incentive: 'Incentive Drop',
+    Wind: 'High Wind',
+    Hail: 'Hailstorm',
 
     detectLocation: 'Detect Location',
     locationDesc: 'We need your location to link your assigned Dark Store',
@@ -262,10 +277,20 @@ const TRANSLATIONS: Record<LanguageCode, I18nStrings> = {
     shieldPaused: 'Shield Paused',
     yourShield: 'Your Shield',
     activeSince: 'Active Since',
+    activeSincePetti: 'Active Since Petti',
+    latestOrderDelivered: 'Latest Order Delivered',
     expiresOn: 'Expires On',
     daysRemaining: 'days remaining',
     todaysEarnings: "Today's Earnings",
     coverageAmount: 'Coverage Amount',
+    loginNote: 'Note: Use any 10 digit number and 6 digit OTP',
+
+    policyTitle: 'Policy Explanation',
+    policyExplanation: 'Your parametric insurance pays out based on event severity. No claims needed.',
+    severity: 'Severity',
+    payoutAmount: 'Payout Amount',
+    simulationTitle: 'Payout Simulator',
+    understandPolicy: 'I Understand',
 
     voiceAssistant: 'Voice Assistant',
     tapToSpeak: 'Tap to Speak',
@@ -354,6 +379,8 @@ const TRANSLATIONS: Record<LanguageCode, I18nStrings> = {
     Internet: 'इंटरनेट आउटेज',
     Fuel: 'ईंधन वृद्धि',
     Incentive: 'प्रोत्साहन गिरावट',
+    Wind: 'तेज़ हवा',
+    Hail: 'ओलावृष्टि',
 
     detectLocation: 'स्थान का पता लगाएं',
     locationDesc: 'हमें आपके असाइन किए गए डार्क स्टोर को जोड़ने के लिए आपके स्थान की आवश्यकता है',
@@ -382,10 +409,20 @@ const TRANSLATIONS: Record<LanguageCode, I18nStrings> = {
     shieldPaused: 'शील्ड रुका हुआ',
     yourShield: 'आपका शील्ड',
     activeSince: 'तब से सक्रिय',
+    activeSincePetti: 'पेटी के बाद से सक्रिय',
+    latestOrderDelivered: 'नवीनतम ऑर्डर डिलीवर किया गया',
     expiresOn: 'समाप्ति तिथि',
     daysRemaining: 'दिन शेष',
     todaysEarnings: 'आज की कमाई',
     coverageAmount: 'कवरेज राशि',
+    loginNote: 'नोट: किसी भी 10 अंकों के नंबर और 6 अंकों के ओटीपी का उपयोग करें',
+
+    policyTitle: 'पॉलिसी विवरण',
+    policyExplanation: 'आपका पैरामीट्रिक बीमा घटना की गंभीरता के आधार पर भुगतान करता है। किसी क्लेम की आवश्यकता नहीं है।',
+    severity: 'गंभीरता',
+    payoutAmount: 'भुगतान राशि',
+    simulationTitle: 'भुगतान सिम्युलेटर',
+    understandPolicy: 'मैं समझता हूँ',
 
     voiceAssistant: 'वॉयस असिस्टेंट',
     tapToSpeak: 'बोलने के लिए टैप करें',
@@ -474,6 +511,8 @@ const TRANSLATIONS: Record<LanguageCode, I18nStrings> = {
     Internet: 'ಇಂಟರ್ನೆಟ್ ಸ್ಥಗಿತ',
     Fuel: 'ಇಂಧನ ಬೆಲೆ ಏರಿಕೆ',
     Incentive: 'ಪ್ರೋತ್ಸಾಹಧನ ಕುಸಿತ',
+    Wind: 'ಬಲವಾದ ಗಾಳಿ',
+    Hail: 'ಆಲಿಕಲ್ಲು ಮಳೆ',
 
     detectLocation: 'ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಿ',
     locationDesc: 'ನಿಮ್ಮ ನಿಯೋಜಿತ ಡಾರ್ಕ್ ಸ್ಟೋರ್ ಅನ್ನು ಲಿಂಕ್ ಮಾಡಲು ನಮಗೆ ನಿಮ್ಮ ಸ್ಥಳದ ಅಗತ್ಯವಿದೆ',
@@ -502,10 +541,20 @@ const TRANSLATIONS: Record<LanguageCode, I18nStrings> = {
     shieldPaused: 'ಶೀಲ್ಡ್ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ',
     yourShield: 'ನಿಮ್ಮ ಶೀಲ್ಡ್',
     activeSince: 'ಸಕ್ರಿಯವಾದಾಗಿನಿಂದ',
+    activeSincePetti: 'ಪೆಟ್ಟಿಯಿಂದ ಸಕ್ರಿಯವಾಗಿದೆ',
+    latestOrderDelivered: 'ಇತ್ತೀಚಿನ ಆರ್ಡರ್ ತಲುಪಿಸಲಾಗಿದೆ',
     expiresOn: 'ಅವಧಿ ಮುಗಿಯುವ ದಿನಾಂಕ',
     daysRemaining: 'ದಿನಗಳು ಬಾಕಿ ಇವೆ',
     todaysEarnings: 'ಇಂದಿನ ಗಳಿಕೆ',
     coverageAmount: 'ಕವರೇಜ್ ಮೊತ್ತ',
+    loginNote: 'ಸೂಚನೆ: ಯಾವುದೇ 10 ಅಂಕಿಯ ಸಂಖ್ಯೆ ಮತ್ತು 6 ಅಂಕಿಯ OTP ಬಳಸಿ',
+
+    policyTitle: 'ಪಾಲಿಸಿ ವಿವರಣೆ',
+    policyExplanation: 'ನಿಮ್ಮ ಪ್ಯಾರಾಮೆಟ್ರಿಕ್ ವಿಮೆಯು ಘಟನೆಯ ತೀವ್ರತೆಯ ಆಧಾರದ ಮೇಲೆ ಪಾವತಿಸುತ್ತದೆ. ಯಾವುದೇ ಕ್ಲೈಮ್‌ಗಳ ಅಗತ್ಯವಿಲ್ಲ.',
+    severity: 'ತೀವ್ರತೆ',
+    payoutAmount: 'ಪಾವತಿ ಮೊತ್ತ',
+    simulationTitle: 'ಪಾವತಿ ಸಿಮ್ಯುಲೇಟರ್',
+    understandPolicy: 'ನನಗೆ ಅರ್ಥವಾಗಿದೆ',
 
     voiceAssistant: 'ಧ್ವನಿ ಸಹಾಯಕ',
     tapToSpeak: 'ಮಾತನಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ',

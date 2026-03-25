@@ -1,23 +1,22 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Navigation, Check, AlertCircle } from 'lucide-react';
-import { Card } from '../components/ui/Card';
+import { motion } from 'framer-motion';
+import { MapPin, Shield, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 import { useI18n } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 
 export default function LocationScreen() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [status, setStatus] = useState<'idle' | 'detecting' | 'detected' | 'error'>('idle');
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [isDetected, setIsDetected] = useState(false);
 
-  const handleDetectLocation = () => {
-    setStatus('detecting');
-    // Simulate location detection
+  const handleDetect = () => {
+    setIsDetecting(true);
     setTimeout(() => {
-      setStatus('detected');
+      setIsDetecting(false);
+      setIsDetected(true);
     }, 2000);
   };
 
@@ -26,95 +25,76 @@ export default function LocationScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0F1E] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#020617] flex flex-col p-6">
+      <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-purple-600/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <MapPin className="w-10 h-10 text-purple-500" />
+          <div className="w-20 h-20 bg-blue-600/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <MapPin className="w-10 h-10 text-blue-500" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">{t.detectLocation}</h1>
           <p className="text-gray-400">{t.locationDesc}</p>
         </div>
 
-        <AnimatePresence mode="wait">
-          {status === 'idle' && (
-            <motion.div
-              key="idle"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <Button onClick={handleDetectLocation} fullWidth size="lg" className="flex items-center justify-center gap-2">
-                <Navigation className="w-5 h-5" />
+        <Card variant="glass" className="p-6 mb-8">
+          {!isDetected ? (
+            <div className="space-y-6">
+              <div className="relative h-48 bg-gray-900/50 rounded-2xl overflow-hidden border border-gray-700 flex items-center justify-center">
+                <div className="absolute inset-0 opacity-20">
+                  <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent"></div>
+                </div>
+                {isDetecting ? (
+                  <div className="relative">
+                    <div className="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-16 h-16 rounded-full"></div>
+                  </div>
+                ) : (
+                  <Shield className="w-12 h-12 text-gray-700" />
+                )}
+              </div>
+              <Button
+                onClick={handleDetect}
+                isLoading={isDetecting}
+                fullWidth
+                variant="primary"
+                size="lg"
+              >
                 {t.allowLocation}
               </Button>
-            </motion.div>
-          )}
-
-          {status === 'detecting' && (
+            </div>
+          ) : (
             <motion.div
-              key="detecting"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center py-10"
-            >
-              <div className="relative w-16 h-16 mx-auto mb-6">
-                <div className="absolute inset-0 border-4 border-purple-500/20 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-              <h2 className="text-xl font-semibold text-white mb-2">{t.detecting}</h2>
-            </motion.div>
-          )}
-
-          {status === 'detected' && (
-            <motion.div
-              key="detected"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <Card variant="glass" className="p-6 border-green-500/30">
-                <div className="flex items-center gap-3 text-green-400 mb-4">
-                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <Check className="w-5 h-5" />
-                  </div>
-                  <span className="font-semibold">{t.locationDetected}</span>
+              <div className="flex items-center gap-4 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-white" />
                 </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">{t.darkStore}</p>
-                    <p className="text-white font-bold text-lg">{user?.darkStore}</p>
-                  </div>
-                  <div className="pt-3 border-t border-white/5">
-                    <p className="text-gray-400 text-sm">{t.currentZone}</p>
-                    <p className="text-white font-semibold">{user?.zone}</p>
-                  </div>
+                <div>
+                  <p className="text-sm text-green-400 font-medium">{t.locationDetected}</p>
+                  <p className="text-white font-bold">Koramangala, Bengaluru</p>
                 </div>
-              </Card>
+              </div>
 
-              <Button onClick={handleContinue} fullWidth size="lg">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-3 border-b border-gray-800">
+                  <span className="text-gray-400 text-sm">{t.currentZone}</span>
+                  <span className="text-white font-medium">Zone 4</span>
+                </div>
+                <div className="flex justify-between items-center py-3 border-b border-gray-800">
+                  <span className="text-gray-400 text-sm">{t.darkStore}</span>
+                  <span className="text-white font-medium">BLK-BLR-047</span>
+                </div>
+              </div>
+
+              <Button onClick={handleContinue} fullWidth variant="primary" size="lg">
                 {t.continue}
               </Button>
             </motion.div>
           )}
-
-          {status === 'error' && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center"
-            >
-              <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <p className="text-gray-400 mb-4">{t.locationDenied}</p>
-              <Button onClick={handleDetectLocation} variant="outline" fullWidth>
-                {t.retry}
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </Card>
       </div>
     </div>
   );

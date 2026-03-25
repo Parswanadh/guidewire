@@ -1,4 +1,4 @@
-import { Shield, Calendar, IndianRupee } from 'lucide-react';
+import { Shield, Calendar, Clock, ShoppingBag } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { ProgressBar } from '../ui/ProgressBar';
@@ -7,18 +7,20 @@ import { useI18n } from '../../context/LanguageContext';
 interface ShieldStatusCardProps {
   isActive: boolean;
   activeSince: string;
+  activeSincePetti: string;
+  latestOrderDelivered: string;
   expiresOn: string;
   remainingDays: number;
-  todayEarnings: number;
   coverageAmount: number;
 }
 
 export function ShieldStatusCard({
   isActive,
   activeSince,
+  activeSincePetti,
+  latestOrderDelivered,
   expiresOn,
   remainingDays,
-  todayEarnings,
   coverageAmount,
 }: ShieldStatusCardProps) {
   const { strings } = useI18n();
@@ -56,11 +58,20 @@ export function ShieldStatusCard({
           </div>
           <div className="bg-black/20 rounded-xl p-3">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-              <IndianRupee className="w-4 h-4" />
-              <span>{strings.todaysEarnings}</span>
+              <Clock className="w-4 h-4" />
+              <span>{strings.activeSincePetti}</span>
             </div>
-            <p className="text-white font-semibold">₹{todayEarnings.toLocaleString()}</p>
+            <p className="text-white font-semibold">{activeSincePetti}</p>
           </div>
+        </div>
+
+        {/* Latest Order */}
+        <div className="bg-black/20 rounded-xl p-3 mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-gray-400 text-sm">
+            <ShoppingBag className="w-4 h-4" />
+            <span>{strings.latestOrderDelivered}</span>
+          </div>
+          <p className="text-white font-semibold">{latestOrderDelivered}</p>
         </div>
 
         {/* Coverage Amount */}
@@ -81,5 +92,3 @@ export function ShieldStatusCard({
     </Card>
   );
 }
-
-

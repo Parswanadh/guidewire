@@ -10,7 +10,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { type CoverageTier, COVERAGE_TIERS } from '../lib/mockData';
 
-type SignupStep = 'mobile' | 'otp' | 'store' | 'coverage';
+import { PolicySimulator } from '../components/dashboard/PolicySimulator';
+
+type SignupStep = 'mobile' | 'otp' | 'store' | 'policy' | 'coverage';
 
 export default function SignupScreen() {
   const { t } = useI18n();
@@ -38,6 +40,10 @@ export default function SignupScreen() {
   };
 
   const handleStoreConfirm = () => {
+    setStep('policy');
+  };
+
+  const handlePolicyConfirm = () => {
     setStep('coverage');
   };
 
@@ -70,9 +76,12 @@ export default function SignupScreen() {
                 required
                 autoFocus
               />
-              <Button type="submit" fullWidth size="lg" disabled={mobile.length < 10}>
+              <Button type="submit" variant="primary" fullWidth size="lg" disabled={mobile.length < 10}>
                 {t.sendOtp}
               </Button>
+              <p className="text-center text-xs text-blue-400/60 mt-2">
+                {t.loginNote}
+              </p>
             </form>
           </motion.div>
         );
@@ -96,12 +105,12 @@ export default function SignupScreen() {
                 required
                 autoFocus
               />
-              <Button type="submit" fullWidth size="lg" disabled={otp.length < 6}>
+              <Button type="submit" variant="primary" fullWidth size="lg" disabled={otp.length < 6}>
                 {t.verifyOtp}
               </Button>
               <button
                 type="button"
-                className="w-full text-purple-400 text-sm font-medium hover:underline"
+                className="w-full text-blue-400 text-sm font-medium hover:underline"
               >
                 {t.resendOtp}
               </button>
@@ -121,17 +130,33 @@ export default function SignupScreen() {
               <MapPin className="w-8 h-8 text-blue-400" />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">{t.darkStore}</h2>
-            <Card variant="glass" className="p-6 mb-8 text-center border-purple-500/50">
+            <Card variant="glass" className="p-6 mb-8 text-center border-blue-500/50">
               <h3 className="text-white font-bold text-lg mb-1">Koramangala 4th Block</h3>
-              <p className="text-purple-400 font-mono text-sm">BLK-BLR-047</p>
+              <p className="text-blue-400 font-mono text-sm">BLK-BLR-047</p>
             </Card>
             <p className="text-gray-400 text-sm mb-8">We have pre-filled this based on your Blinkit Partner ID.</p>
             <div className="space-y-3">
-              <Button onClick={handleStoreConfirm} fullWidth size="lg">
-                {t.confirm}
+              <Button onClick={handleStoreConfirm} variant="primary" fullWidth size="lg">
+                {t.continue}
               </Button>
-              <button className="text-gray-500 text-sm hover:underline">{t.back}</button>
+              <button onClick={() => setStep('otp')} className="text-gray-500 text-sm hover:underline">{t.back}</button>
             </div>
+          </motion.div>
+        );
+      case 'policy':
+        return (
+          <motion.div
+            key="policy"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <PolicySimulator />
+            <Button onClick={handlePolicyConfirm} variant="primary" fullWidth size="lg">
+              {t.understandPolicy || 'I Understand'}
+            </Button>
+            <button onClick={() => setStep('store')} className="w-full text-gray-500 text-sm hover:underline">{t.back}</button>
           </motion.div>
         );
       case 'coverage':
@@ -166,6 +191,7 @@ export default function SignupScreen() {
               </p>
               <Button
                 onClick={handleSignupComplete}
+                variant="primary"
                 isLoading={isLoading}
                 fullWidth
                 size="lg"
@@ -194,7 +220,7 @@ export default function SignupScreen() {
           <ArrowLeft className="w-6 h-6 text-white" />
         </button>
         <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-purple-500" />
+          <Shield className="w-5 h-5 text-blue-500" />
           <span className="text-white font-bold">ShieldRide</span>
         </div>
         <div className="w-10" /> {/* Spacer */}
@@ -204,7 +230,7 @@ export default function SignupScreen() {
       <div className="px-6 mb-8">
         <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-purple-500"
+            className="h-full bg-blue-500"
             initial={{ width: 0 }}
             animate={{ width: `${getStepProgress()}%` }}
           />

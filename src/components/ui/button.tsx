@@ -10,9 +10,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles = {
-  primary: 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/30',
-  secondary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30',
-  outline: 'bg-transparent border-2 border-purple-500 text-purple-400 hover:bg-purple-500/10',
+  primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30',
+  secondary: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/30',
+  outline: 'bg-transparent border-2 border-blue-500 text-blue-400 hover:bg-blue-500/10',
   ghost: 'bg-transparent text-gray-300 hover:bg-white/5',
   danger: 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/30',
 };
@@ -44,7 +44,7 @@ export function Button({
         ${fullWidth ? 'w-full' : ''}
         ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''}
         rounded-xl font-medium transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900
         ${className}
       `}
       disabled={disabled || isLoading}

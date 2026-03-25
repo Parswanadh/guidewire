@@ -52,9 +52,10 @@ export default function HomeScreen() {
             <ShieldStatusCard
               isActive={user?.shieldStatus.active || false}
               activeSince={user?.activeSince || ''}
+              activeSincePetti={user?.activeSincePetti || ''}
+              latestOrderDelivered={user?.latestOrderDelivered || ''}
               expiresOn={user?.expiresOn || ''}
               remainingDays={user?.shieldStatus.remainingDays || 0}
-              todayEarnings={user?.todayEarnings || 0}
               coverageAmount={user?.coverageAmount || 0}
             />
             <Card variant="glass" className="p-4">
@@ -82,12 +83,12 @@ export default function HomeScreen() {
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <Card variant="glass" className="p-4 text-center border-purple-500/20">
+              <Card variant="glass" className="p-4 text-center border-blue-500/20">
                 <p className="text-gray-400 text-sm">{t.totalPolicies}</p>
                 <p className="text-2xl font-bold text-white">{INSURER_METRICS.totalPolicies.toLocaleString()}</p>
                 <p className="text-green-400 text-xs mt-1">+{INSURER_METRICS.activePolicies - 2600} this week</p>
               </Card>
-              <Card variant="glass" className="p-4 text-center border-blue-500/20">
+              <Card variant="glass" className="p-4 text-center border-indigo-500/20">
                 <p className="text-gray-400 text-sm">{t.totalEarned}</p>
                 <p className="text-2xl font-bold text-white">₹{(INSURER_METRICS.totalClaims * 180).toLocaleString()}</p>
                 <p className="text-blue-400 text-xs mt-1">{INSURER_METRICS.totalClaims} events</p>
@@ -104,9 +105,29 @@ export default function HomeScreen() {
         return (
           <div className="space-y-4">
              <Card variant="glass" className="p-4">
-                <h3 className="text-white font-semibold mb-4">Forward Reserve Intelligence</h3>
-                <div className="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20 mb-3">
-                  <p className="text-sm text-purple-400 font-bold mb-1">Koramangala 4th Block (Zone 4)</p>
+                <h3 className="text-white font-semibold mb-4 text-sm">Claims Breakdown by Trigger</h3>
+                <div className="space-y-3">
+                  {INSURER_METRICS.claimsByType.map((item) => (
+                    <div key={item.type} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">{(t as any)[item.type] || item.type}</span>
+                        <span className="text-white font-medium">₹{item.amount.toLocaleString()}</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-500 rounded-full" 
+                          style={{ width: `${(item.count / INSURER_METRICS.totalClaims) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+             </Card>
+
+             <Card variant="glass" className="p-4">
+                <h3 className="text-white font-semibold mb-4 text-sm">Forward Reserve Intelligence</h3>
+                <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20 mb-3">
+                  <p className="text-sm text-blue-400 font-bold mb-1">Koramangala 4th Block (Zone 4)</p>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-gray-400">Rainfall Probability</span>
                     <span className="text-white">73%</span>
@@ -116,8 +137,8 @@ export default function HomeScreen() {
                     <span className="text-white">₹18,400</span>
                   </div>
                 </div>
-                <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                  <p className="text-sm text-blue-400 font-bold mb-1">Bellandur (Zone 7)</p>
+                <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                  <p className="text-sm text-indigo-400 font-bold mb-1">Bellandur (Zone 7)</p>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-gray-400">Rainfall Probability</span>
                     <span className="text-white">81%</span>
@@ -137,12 +158,12 @@ export default function HomeScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F1E] via-[#1a1f3e] to-[#0A0F1E]">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#020617]">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#0A0F1E]/80 backdrop-blur-lg border-b border-gray-800 px-4 py-3">
+      <header className="sticky top-0 z-40 bg-[#020617]/80 backdrop-blur-lg border-b border-gray-800 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-600/30">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -159,7 +180,7 @@ export default function HomeScreen() {
                 setViewMode(viewMode === 'worker' ? 'insurer' : 'worker');
                 setActiveTab('overview');
               }}
-              className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 rounded-lg text-sm font-medium text-purple-400 transition-colors"
+              className="px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 rounded-lg text-sm font-medium text-blue-400 transition-colors"
             >
               {viewMode === 'worker' ? t.switchToInsurer : t.switchToWorker}
             </button>
@@ -179,7 +200,7 @@ export default function HomeScreen() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute right-4 top-16 w-48 bg-gray-800 rounded-xl shadow-xl border border-gray-700 overflow-hidden"
+              className="absolute right-4 top-16 w-48 bg-gray-900 rounded-xl shadow-xl border border-gray-700 overflow-hidden"
             >
               <button
                 onClick={() => {

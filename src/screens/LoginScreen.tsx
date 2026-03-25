@@ -80,7 +80,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F1E] via-[#1a1f3e] to-[#0A0F1E] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#020617] flex flex-col">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -102,7 +102,7 @@ export default function LoginScreen() {
         className="flex-1 px-6 pb-8 flex flex-col justify-center max-w-md mx-auto w-full"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-2xl mb-4 shadow-lg shadow-purple-600/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/30">
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">{t.login}</h1>
@@ -125,6 +125,7 @@ export default function LoginScreen() {
               />
               <Button
                 type="submit"
+                variant="primary"
                 isLoading={isLoading}
                 disabled={mobile.length !== 10}
                 fullWidth
@@ -132,6 +133,9 @@ export default function LoginScreen() {
               >
                 {t.sendOtp}
               </Button>
+              <p className="text-center text-xs text-blue-400/60 mt-2">
+                {t.loginNote}
+              </p>
             </form>
           ) : (
             <form onSubmit={handleOtpSubmit} className="space-y-4">
@@ -140,7 +144,7 @@ export default function LoginScreen() {
                 <button
                   type="button"
                   onClick={() => setStep('mobile')}
-                  className="text-purple-400 text-sm hover:underline"
+                  className="text-blue-400 text-sm hover:underline"
                 >
                   Change number
                 </button>
@@ -160,6 +164,7 @@ export default function LoginScreen() {
 
               <Button
                 type="submit"
+                variant="primary"
                 isLoading={isLoading}
                 disabled={otp.length !== 6}
                 fullWidth
@@ -172,7 +177,7 @@ export default function LoginScreen() {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={countdown > 0 || isLoading}
-                className="w-full text-center text-purple-400 text-sm hover:underline disabled:text-gray-500 disabled:no-underline"
+                className="w-full text-center text-blue-400 text-sm hover:underline disabled:text-gray-500 disabled:no-underline"
               >
                 {countdown > 0 ? `${t.resendOtp} in ${countdown}s` : t.resendOtp}
               </button>
@@ -182,7 +187,7 @@ export default function LoginScreen() {
 
         <p className="text-center text-gray-500 text-sm mt-6">
           {t.dontHaveAccount}{' '}
-          <button onClick={() => navigate('/signup')} className="text-purple-400 hover:underline">
+          <button onClick={() => navigate('/signup')} className="text-blue-400 hover:underline">
             {t.signup}
           </button>
         </p>
@@ -190,4 +195,3 @@ export default function LoginScreen() {
     </div>
   );
 }
-
