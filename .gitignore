@@ -15,6 +15,8 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/mcp.json
+!.vscode/mcp.env.example
 .idea
 .DS_Store
 *.suo
@@ -24,6 +26,10 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Environment secrets
+.env
+mydatabase.db
 
 # Playwright and Test Results
 playwright-report/

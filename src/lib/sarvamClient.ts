@@ -1,5 +1,4 @@
 // ShieldRide Sarvam AI Client - Speech-to-Text and Text-to-Speech
-// This is a mock implementation. Replace with actual Sarvam AI API calls when credentials are available.
 import { FAQ_RESPONSES } from './mockData';
 
 export interface SarvamConfig {
@@ -22,27 +21,74 @@ export function isSarvamConfigured(): boolean {
 // Speech-to-Text (Saaras v3)
 // Transcribes audio blob to text using Sarvam AI's Saaras v3 model
 export async function transcribeAudio(_audioBlob: Blob, language: string): Promise<string> {
-  // Mock implementation - returns predefined responses
-  // In production, this would call Sarvam AI's STT API
+  const apiKey = import.meta.env.VITE_SARVAM_API_KEY;
+  const sttUrl = import.meta.env.VITE_SARVAM_STT_URL;
 
-  await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
+  if (!apiKey || !sttUrl) {
+    throw new Error('Sarvam STT is not configured. Set VITE_SARVAM_API_KEY and VITE_SARVAM_STT_URL.');
+  }
 
-  // Simulate transcription based on keywords
-  const mockResponses: Record<string, string[]> = {
-    'en-IN': ['what does my plan cover', 'how do i file a claim', 'when will i get paid', 'what if i have an accident'],
-    'hi-IN': ['meri plan mein kya cover hai', 'claim kaise file karu', 'mujhe kab payment milega', 'agar accident ho gaya to'],
-    'kn-IN': ['nanna plan ennu cover maduttade', 'claim hage file madabahudu', 'nanage payment yavadagu'],
-  };
+  const formData = new FormData();
+  formData.append('file', _audioBlob, 'speech.wav');
+  formData.append('language_code', language);
 
-  const responses = mockResponses[language] || mockResponses['en-IN'];
-  return responses[Math.floor(Math.random() * responses.length)];
+  const response = await fetch(sttUrl, {
+    method: 'POST',
+    headers: {
+      'api-subscription-key': apiKey,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Sarvam STT request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  const transcript =
+    data?.transcript ||
+    data?.text ||
+    data?.output?.transcript ||
+    data?.result?.transcript ||
+    '';
+
+  if (!transcript) {
+    throw new Error('Sarvam STT response did not include transcript text');
+  }
+
+  return transcript;
 }
 
 // Text-to-Speech (Bulbul v3)
 // Synthesizes speech from text using Sarvam AI's Bulbul v3 model
 export async function synthesizeSpeech(text: string, language: string): Promise<void> {
-  // Mock implementation using browser's built-in speech synthesis
-  // In production, this would call Sarvam AI's TTS API and play the returned audio
+  const apiKey = import.meta.env.VITE_SARVAM_API_KEY;
+  const ttsUrl = import.meta.env.VITE_SARVAM_TTS_URL;
+
+  if (apiKey && ttsUrl) {
+    const response = await fetch(ttsUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-subscription-key': apiKey,
+      },
+      body: JSON.stringify({
+        text,
+        target_language_code: language,
+      }),
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      if (blob.size > 0) {
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        await audio.play();
+        URL.revokeObjectURL(audioUrl);
+        return;
+      }
+    }
+  }
 
   if (typeof window === 'undefined' || !window.speechSynthesis) {
     console.warn('Speech synthesis not supported');

@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { Mic, Waves, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { useI18n } from '../../context/LanguageContext';
-import { synthesizeSpeech, getFAQResponse } from '../../lib/sarvamClient';
+import { AudioRecorder, getFAQResponse, synthesizeSpeech, transcribeAudio } from '../../lib/sarvamClient';
 
 interface VoiceAssistantProps {
   language: string;
@@ -16,65 +16,42 @@ export function VoiceAssistant({ language }: VoiceAssistantProps) {
   const [state, setState] = useState<VoiceState>('idle');
   const [response, setResponse] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
-  const recognitionRef = useRef<any>(null);
 
-  useEffect(() => {
-    // Initialize speech recognition
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = language;
+  const recorderRef = useRef(new AudioRecorder());
 
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        handleTranscript(transcript);
-      };
-
-      recognitionRef.current.onerror = () => {
-        setState('idle');
-      };
-
-      recognitionRef.current.onend = () => {
-        if (state === 'listening') {
-          setState('idle');
-        }
-      };
-    }
-
-    return () => {
-      recognitionRef.current?.stop();
-    };
-  }, [language, state]);
-
-  const handleTranscript = (transcript: string) => {
+  const handleTranscript = async (transcript: string) => {
     setState('processing');
     const faqResponse = getFAQResponse(transcript, language);
     setResponse(faqResponse);
 
-    setTimeout(async () => {
-      setState('speaking');
-      try {
-        await synthesizeSpeech(faqResponse, language);
-      } catch {
-        // Ignore speech errors
-      }
-      setState('idle');
-    }, 500);
+    setState('speaking');
+    try {
+      await synthesizeSpeech(faqResponse, language);
+    } catch {
+      // Ignore speech playback errors.
+    }
+    setState('idle');
   };
 
-  const startListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.lang = language;
-      recognitionRef.current.start();
+  const startListening = async () => {
+    try {
+      await recorderRef.current.start();
       setState('listening');
+    } catch {
+      setState('idle');
     }
   };
 
-  const stopListening = () => {
-    recognitionRef.current?.stop();
-    setState('idle');
+  const stopListening = async () => {
+    try {
+      setState('processing');
+      const blob = await recorderRef.current.stop();
+      const transcript = await transcribeAudio(blob, language);
+      await handleTranscript(transcript);
+    } catch {
+      setState('idle');
+      setResponse('Voice transcription failed. Please check microphone access and API configuration.');
+    }
   };
 
   const quickQuestions = [
@@ -102,7 +79,6 @@ export function VoiceAssistant({ language }: VoiceAssistantProps) {
           className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96"
         >
           <Card variant="gradient" className="border-purple-500/50">
-            {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-purple-500/20 rounded-xl">
@@ -115,13 +91,13 @@ export function VoiceAssistant({ language }: VoiceAssistantProps) {
               </div>
               <button
                 onClick={() => setIsMinimized(true)}
+                aria-label="Minimize voice assistant"
                 className="p-1 hover:bg-white/10 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
-            {/* Response Area */}
             {response && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -132,12 +108,12 @@ export function VoiceAssistant({ language }: VoiceAssistantProps) {
               </motion.div>
             )}
 
-            {/* Voice Button */}
             <div className="flex justify-center mb-4">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={state === 'listening' ? stopListening : startListening}
+                aria-label={state === 'listening' ? 'Stop voice capture' : 'Start voice capture'}
                 className={`
                   relative w-20 h-20 rounded-full ${stateConfig[state].color}
                   flex items-center justify-center shadow-xl
@@ -159,7 +135,6 @@ export function VoiceAssistant({ language }: VoiceAssistantProps) {
               </motion.button>
             </div>
 
-            {/* Quick Questions */}
             <div>
               <p className="text-xs text-gray-400 mb-2 text-center">{strings.commonQuestions}</p>
               <div className="grid grid-cols-2 gap-2">
@@ -179,13 +154,13 @@ export function VoiceAssistant({ language }: VoiceAssistantProps) {
         </motion.div>
       )}
 
-      {/* Minimized FAB */}
       {isMinimized && (
         <motion.button
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsMinimized(false)}
+          aria-label="Open voice assistant"
           className="fixed bottom-20 right-4 z-50 w-14 h-14 bg-purple-600 rounded-full shadow-lg shadow-purple-600/30 flex items-center justify-center"
         >
           <Mic className="w-6 h-6 text-white" />
@@ -194,5 +169,3 @@ export function VoiceAssistant({ language }: VoiceAssistantProps) {
     </AnimatePresence>
   );
 }
-
-

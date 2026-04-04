@@ -3,6 +3,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LanguageSelectScreen from './screens/LanguageSelectScreen';
 import LoginScreen from './screens/LoginScreen';
+import InsurerLoginScreen from './screens/InsurerLoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import LocationScreen from './screens/LocationScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -14,7 +15,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0A0F1E]">
-        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -33,7 +34,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0A0F1E]">
-        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -69,6 +70,14 @@ function App() {
                     <SignupScreen />
                   </PublicRoute>
                 } 
+              />
+              <Route
+                path="/insurer-login"
+                element={
+                  <PublicRoute>
+                    <InsurerLoginScreen />
+                  </PublicRoute>
+                }
               />
               <Route 
                 path="/location" 

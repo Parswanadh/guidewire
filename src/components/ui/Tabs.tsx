@@ -25,7 +25,7 @@ export function Tabs({ tabs, defaultTab, onChange, renderContent }: TabsProps) {
   return (
     <div className="w-full">
       {/* Tab Headers */}
-      <div className="flex gap-2 p-1 bg-gray-800/50 rounded-xl mb-4">
+      <div className="flex gap-2 p-1 sr-tabs-shell rounded-xl mb-4">
         {tabs.map((tab) => (
           <motion.button
             key={tab.id}
@@ -34,9 +34,10 @@ export function Tabs({ tabs, defaultTab, onChange, renderContent }: TabsProps) {
             className={`
               flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
               font-medium transition-all duration-200
+              sr-focus-ring
               ${activeTab === tab.id
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'sr-tab-active'
+                : 'sr-tab-inactive'
               }
             `}
           >

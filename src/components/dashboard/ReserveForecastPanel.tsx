@@ -5,9 +5,11 @@ import { useI18n } from '../../context/LanguageContext';
 interface ReserveForecastPanelProps {
   current: number;
   projected: number;
+  provenance?: string;
+  actionHint?: string;
 }
 
-export function ReserveForecastPanel({ current, projected }: ReserveForecastPanelProps) {
+export function ReserveForecastPanel({ current, projected, provenance, actionHint }: ReserveForecastPanelProps) {
   const { strings } = useI18n();
 
   const growth = ((projected - current) / current) * 100;
@@ -67,6 +69,9 @@ export function ReserveForecastPanel({ current, projected }: ReserveForecastPane
           {growth >= 0 ? '+' : ''}{growth.toFixed(1)}%
         </span>
       </div>
+
+      {provenance && <p className="text-[11px] text-gray-500 mt-3">{provenance}</p>}
+      {actionHint && <p className="text-xs text-blue-200 mt-1">Action: {actionHint}</p>}
     </Card>
   );
 }

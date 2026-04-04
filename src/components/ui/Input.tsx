@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -15,10 +15,14 @@ export function Input({
   className = '',
   ...props
 }: InputProps) {
+  const generatedId = useId();
+  const inputId = props.id ?? generatedId;
+  const autoComplete = props.autoComplete ?? getDefaultAutoComplete(props.type, label);
+
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-gray-300 mb-1.5">
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-1.5">
           {label}
         </label>
       )}
@@ -29,11 +33,13 @@ export function Input({
           </div>
         )}
         <input
+          id={inputId}
+          autoComplete={autoComplete}
           className={`
             w-full px-4 py-3 ${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''}
-            bg-gray-800/50 border ${error ? 'border-red-500' : 'border-gray-700'}
-            rounded-xl text-white placeholder-gray-500
-            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+            sr-input-base ${error ? 'sr-input-error' : ''}
+            rounded-xl
+            sr-focus-ring
             transition-all duration-200
             ${className}
           `}
@@ -50,4 +56,22 @@ export function Input({
       )}
     </div>
   );
+}
+
+function getDefaultAutoComplete(type: InputProps['type'], label?: string): string {
+  const normalizedLabel = (label || '').toLowerCase();
+
+  if (type === 'email') return 'email';
+  if (type === 'tel') return 'tel-national';
+
+  if (type === 'password') {
+    if (normalizedLabel.includes('new') || normalizedLabel.includes('create') || normalizedLabel.includes('signup')) {
+      return 'new-password';
+    }
+    return 'current-password';
+  }
+
+  if (normalizedLabel.includes('name')) return 'name';
+
+  return 'off';
 }

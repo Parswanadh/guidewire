@@ -5,9 +5,10 @@ import { useI18n } from '../../context/LanguageContext';
 interface LossRatioGaugeProps {
   value: number;
   target?: number;
+  provenance?: string;
 }
 
-export function LossRatioGauge({ value, target = 65 }: LossRatioGaugeProps) {
+export function LossRatioGauge({ value, target = 65, provenance }: LossRatioGaugeProps) {
   const { strings } = useI18n();
 
   const isGood = value <= target;
@@ -68,6 +69,10 @@ export function LossRatioGauge({ value, target = 65 }: LossRatioGaugeProps) {
         <p className="text-sm text-gray-400 mt-4">
           {isGood ? 'Within acceptable range' : 'Above target - review needed'}
         </p>
+
+        {provenance && (
+          <p className="text-[11px] text-gray-500 mt-3">{provenance}</p>
+        )}
       </div>
     </Card>
   );

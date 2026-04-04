@@ -1,217 +1,166 @@
-# Voice Assistant - Multilingual Web App
+# ShieldRide - AI Income Protection Platform
 
-A production-quality, mobile-first voice assistant web application powered by Sarvam AI, supporting multiple Indian languages including Kannada, Hindi, and English.
+ShieldRide is a full-stack parametric insurance platform for delivery riders with:
+- separate rider and insurer login flows
+- GPS-based hub assignment
+- dynamic weather-aware premium calculation
+- MongoDB-backed rider onboarding and insurer operations dashboard
+- multilingual voice assistant powered by Sarvam APIs
 
-## Features
+## Current Architecture
 
-- **Multilingual Support**: Native support for Kannada (ಕನ್ನಡ), Hindi (हिंदी), and English
-- **Voice Recognition**: Speech-to-Text using Sarvam's Saaras API v3
-- **Text-to-Speech**: Natural voice playback using Sarvam's Bulbul API v3
-- **Modern UI**: Built with React, TypeScript, and Tailwind CSS
-- **Responsive Design**: Optimized for mobile devices with touch-friendly controls
-- **Accessible**: Full keyboard navigation and ARIA labels
-- **Tested**: Comprehensive E2E tests with Playwright
+### Frontend
+- Vite + React 19 + TypeScript
+- Tailwind CSS + reusable UI components
+- Mobile-first rider onboarding and dashboard UX
 
-## Tech Stack
+### Backend
+- Express API server (`server/index.js`)
+- JWT-based authentication
+- Role-aware access control (`rider` and `insurer`)
 
-- **Framework**: Vite + React 19 + TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui patterns
-- **Voice APIs**: Sarvam AI (Saaras v3 for STT, Bulbul v3 for TTS)
-- **Testing**: Playwright for E2E testing
-- **Build Tool**: Vite
+### Database
+- MongoDB (via Mongoose)
+- Rider, Insurer, and Hub collections
 
-## Installation
+### External APIs
+- Open-Meteo API for live weather signals used in dynamic pricing and trigger generation
+- Sarvam Saaras/Bulbul endpoints for STT/TTS in voice assistant
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd guidewire
-```
+## Features Implemented
 
-2. Install dependencies:
+1. Rider signup + signin (with rider name capture)
+2. Separate insurer signin route
+3. Persistent login sessions via JWT + local storage
+4. GPS detection and nearest local hub selection
+5. Dynamic plan pricing (`basic`, `standard`, `premium`) based on weather and work hours
+6. MongoDB persistence for rider onboarding data
+7. Insurer dashboard receives newly signed-up riders from DB immediately
+8. API-backed rider/insurer dashboards (no static auth or hardcoded onboarding)
+
+## Local Setup
+
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
-```bash
-cp .env.example .env
+2. Create `.env` from template values in `.env.example`.
+
+3. Pick MongoDB runtime mode in `.env`:
+```env
+MONGODB_MODE=auto
+MONGODB_LOCAL_URI=mongodb://127.0.0.1:27017/shieldride
+MONGODB_ATLAS_URI=
+MONGODB_FALLBACK_MODE=off
 ```
 
-Edit `.env` and add your Sarvam API key:
-```
-VITE_SARVAM_API_KEY=your_actual_api_key_here
-```
+Recommended for persistent demo data:
+- Use `MONGODB_MODE=local` if local MongoDB is installed and running.
+- Use `MONGODB_MODE=atlas` and set `MONGODB_ATLAS_URI` for MongoDB Atlas.
+- Keep `MONGODB_FALLBACK_MODE=off` to enforce persistent DB only.
 
-4. Start the development server:
+Emergency fallback (non-persistent):
+- Set `MONGODB_FALLBACK_MODE=memory` only if local/Atlas is unavailable during demo.
+
+4. Start full stack (frontend + API server):
 ```bash
 npm run dev
 ```
 
-5. Open your browser and navigate to `http://localhost:5173`
+5. Open app:
+- Frontend: `http://localhost:3000`
+- API health: `http://localhost:4000/api/health`
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_SARVAM_API_KEY` | Your Sarvam AI API key (required) | - |
-| `VITE_SARVAM_STT_URL` | Speech-to-Text API endpoint | `https://api.saaras.ai/v1/stt` |
-| `VITE_SARVAM_TTS_URL` | Text-to-Speech API endpoint | `https://api.bulbul.ai/v1/tts` |
+### Frontend
+- `VITE_API_BASE_URL`
+- `VITE_SARVAM_API_KEY`
+- `VITE_SARVAM_STT_URL`
+- `VITE_SARVAM_TTS_URL`
 
-## Getting a Sarvam API Key
+### Backend
+- `MONGODB_MODE` (`auto`, `local`, `atlas`, `memory`)
+- `MONGODB_LOCAL_URI`
+- `MONGODB_ATLAS_URI`
+- `MONGODB_URI` (optional direct override)
+- `MONGODB_FALLBACK_MODE` (`off` or `memory`)
+- `DEV_IMPLICIT_MEMORY_FALLBACK` (`on` or `off` for non-production fallback behavior)
+- `JWT_SECRET`
+- `CORS_ORIGINS` (comma-separated allowlist for credentialed CORS)
+- `AUTH_RATE_LIMIT_WINDOW_MS`
+- `AUTH_RATE_LIMIT_MAX`
+- `WEATHER_TIMEOUT_MS`
+- `API_PORT`
+- `API_JSON_LIMIT`
+- `API_URLENCODED_LIMIT`
+- `INSURER_EMAIL`
+- `INSURER_PASSWORD`
 
-1. Visit [Sarvam AI](https://sarvam.ai/)
-2. Sign up for an account
-3. Navigate to the API section
-4. Generate your API key
-5. Add it to your `.env` file
+## Default Insurer Login
 
-## Running Tests
+If no insurer exists, one is auto-seeded on API startup:
+- Email: `insurer@shieldride.ai`
+- Password: `Insurer@123`
 
-### E2E Tests with Playwright
+(Override with `INSURER_EMAIL` and `INSURER_PASSWORD` in `.env`.)
 
-```bash
-# Run all tests
-npm run test
+## API Surface (Key Endpoints)
 
-# Run tests in headed mode (see browser)
-npx playwright test --headed
+- `POST /api/auth/rider/signup`
+- `POST /api/auth/rider/login`
+- `POST /api/auth/insurer/login`
+- `GET /api/auth/me`
+- `GET /api/hubs/nearby?lat=...&lng=...`
+- `POST /api/rider/hub`
+- `POST /api/pricing/quote`
+- `GET /api/dashboard/rider`
+- `GET /api/dashboard/insurer`
 
-# Run specific test file
-npx playwright test language-switch.spec.ts
+## MCP Configuration
 
-# View test report
-npx playwright show-report
-```
+Workspace MCP configuration is available at:
+- `.vscode/mcp.json`
+- `.vscode/mcp.env.example`
 
-### Building for Production
+Included MCP servers now also include:
+- Sequential Thinking MCP (`@modelcontextprotocol/server-sequential-thinking`)
+
+PostgreSQL MCP is intentionally excluded as requested (no Docker/Postgres dependency in current setup).
+
+## Test and Build
 
 ```bash
 npm run build
+npm run test:quality
+npm run test:smoke:api
 ```
 
-The production files will be in the `dist` directory.
-
-### Preview Production Build
+Optional Playwright suite (not required for regular backend smoke validation):
 
 ```bash
-npm run preview
+npm run test:smoke:ui
+npm run test
 ```
 
-## Project Structure
+## CI Quality Gates
 
-```
-guidewire/
-├── src/
-│   ├── components/          # React components
-│   │   ├── ui/             # shadcn-style UI components
-│   │   ├── Layout.tsx      # Main layout component
-│   │   ├── LanguageSelector.tsx
-│   │   ├── VoiceControls.tsx
-│   │   └── TranscriptView.tsx
-│   ├── lib/                # Utility libraries
-│   │   ├── i18n.ts         # Internationalization
-│   │   ├── sarvamClient.ts # Sarvam API client
-│   │   ├── audioRecorder.ts # Audio recording utilities
-│   │   └── utils.ts        # Common utilities
-│   ├── App.tsx             # Main app component
-│   ├── main.tsx            # Entry point
-│   └── index.css           # Global styles
-├── tests/
-│   └── e2e/                # Playwright E2E tests
-│       ├── language-switch.spec.ts
-│       └── voice-flow.spec.ts
-├── playwright.config.ts    # Playwright configuration
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── README.md
-```
+GitHub Actions workflow is available at:
+- `.github/workflows/quality.yml`
 
-## Adding More Languages
+Pipeline stages:
+1. Build + full quality suite (`test:quality`)
+2. API smoke (`test:smoke:api`) + minimal UI smoke (`test:smoke:ui`)
 
-To add support for additional languages:
+CI uses a MongoDB service container with deterministic local-mode settings to keep runs stable and reproducible.
 
-1. Edit `src/lib/i18n.ts`
-2. Add the language code to `LANGUAGE_CONFIGS`:
-```typescript
-export const LANGUAGE_CONFIGS: Record<LanguageCode, LanguageConfig> = {
-  // ... existing languages
-  "te-IN": {
-    code: "te-IN",
-    label: "Telugu",
-    nativeLabel: "తెలుగు",
-    dir: "ltr",
-    flag: "🇮🇳",
-  },
-};
-```
+## Notes
 
-3. Add translations to `TRANSLATIONS`:
-```typescript
-export const TRANSLATIONS: Record<LanguageCode, I18nStrings> = {
-  // ... existing languages
-  "te-IN": {
-    appTitle: "వాయిస్ అసిస్టెంట్",
-    // ... add all other strings
-  },
-};
-```
-
-4. Update the `LanguageCode` type to include the new language
-
-## Deployment
-
-### Vercel
-
-1. Install the Vercel CLI:
-```bash
-npm install -g vercel
-```
-
-2. Deploy:
-```bash
-vercel
-```
-
-3. Set environment variables in Vercel dashboard:
-   - Add `VITE_SARVAM_API_KEY` (prefix with `VITE_` for client-side access)
-
-### Other Platforms
-
-The app can be deployed to any static hosting service:
-- Netlify
-- AWS S3 + CloudFront
-- GitHub Pages
-- Firebase Hosting
-
-Just run `npm run build` and deploy the `dist` folder.
-
-## Development
-
-### Code Quality
-
-- **TypeScript Strict Mode**: Enabled for maximum type safety
-- **ESLint**: Configured for React and TypeScript
-- **No `any` types**: All code is fully typed
-
-### Component Patterns
-
-- Functional components with hooks
-- Props interfaces for type safety
-- Consistent naming conventions
-- ARIA labels for accessibility
-
-## License
-
-MIT
-
-## Support
-
-For issues and questions:
-- Check the [Sarvam AI Documentation](https://docs.sarvam.ai/)
-- Open an issue in the repository
-
----
-
-Built with ❤️ using Sarvam AI
+- Dynamic pricing and dashboard triggers use live weather input where location is available.
+- Health endpoint now reports DB mode and persistence status for demo verification (`/api/health`).
+- Backend supports persistent local and Atlas MongoDB modes; memory mode is optional fallback only.
+- For non-production resilience, startup can auto-fallback to in-memory MongoDB when persistent DB is unavailable (configurable via `DEV_IMPLICIT_MEMORY_FALLBACK`).
+- API payload limits are configurable to reduce 413 issues (`API_JSON_LIMIT`, `API_URLENCODED_LIMIT`).
+- Auth endpoints are rate-limited and CORS is allowlist-driven through environment configuration.
+- Sarvam STT/TTS requires valid API credentials. If credentials are missing or endpoint payload format differs, voice transcription/synthesis will return runtime errors and should be validated against your Sarvam account configuration.

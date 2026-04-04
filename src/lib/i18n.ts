@@ -9,6 +9,7 @@ export interface LanguageConfig {
   flag: string;
   direction: 'ltr' | 'rtl';
   fontFamily: string;
+  displayFontFamily: string;
 }
 
 export interface I18nStrings {
@@ -163,7 +164,8 @@ export const LANGUAGE_CONFIGS: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'English',
     flag: '🇮🇳',
     direction: 'ltr',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Manrope', 'Noto Sans', sans-serif",
+    displayFontFamily: "'Sora', 'Manrope', sans-serif",
   },
   'hi-IN': {
     code: 'hi-IN',
@@ -171,7 +173,8 @@ export const LANGUAGE_CONFIGS: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'हिन्दी',
     flag: '🇮🇳',
     direction: 'ltr',
-    fontFamily: "'Noto Sans Devanagari', sans-serif",
+    fontFamily: "'Noto Sans Devanagari', 'Mukta', sans-serif",
+    displayFontFamily: "'Noto Sans Devanagari', 'Mukta', sans-serif",
   },
   'kn-IN': {
     code: 'kn-IN',
@@ -179,7 +182,8 @@ export const LANGUAGE_CONFIGS: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'ಕನ್ನಡ',
     flag: '🇮🇳',
     direction: 'ltr',
-    fontFamily: "'Noto Sans Kannada', sans-serif",
+    fontFamily: "'Noto Sans Kannada', 'Tiro Kannada', sans-serif",
+    displayFontFamily: "'Noto Sans Kannada', 'Tiro Kannada', sans-serif",
   },
 };
 

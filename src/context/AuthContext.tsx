@@ -1,14 +1,26 @@
-// Auth Context - Manages authentication state
+// Auth Context - Manages API-backed authentication state
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import { type MockUser, MOCK_USER } from '../lib/mockData';
+import { apiClient, type AuthUser, type RiderUser } from '../lib/apiClient';
 
 interface AuthContextType {
-  user: MockUser | null;
+  user: AuthUser | null;
+  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (mobile: string, otp: string) => Promise<boolean>;
+  riderSignIn: (mobile: string, password: string) => Promise<RiderUser>;
+  riderSignUp: (payload: {
+    name: string;
+    mobile: string;
+    password: string;
+    plan: 'basic' | 'standard' | 'premium';
+    hubId?: string;
+    partnerId?: string;
+    location?: { lat: number; lng: number };
+  }) => Promise<RiderUser>;
+  insurerSignIn: (email: string, password: string) => Promise<AuthUser>;
+  refreshUser: () => Promise<void>;
+  setUser: (user: AuthUser) => void;
   logout: () => void;
-  updateUser: (updates: Partial<MockUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,65 +30,121 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUserState] = useState<AuthUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for existing session
-    if (typeof localStorage !== 'undefined') {
-      const storedAuth = localStorage.getItem('shieldride_auth');
-      if (storedAuth) {
-        try {
-          setUser(JSON.parse(storedAuth));
-        } catch {
-          localStorage.removeItem('shieldride_auth');
-        }
-      }
+  const persistAuth = useCallback((nextUser: AuthUser, nextToken: string) => {
+    setUserState(nextUser);
+    setToken(nextToken);
+    try {
+      localStorage.setItem('shieldride_auth_token', nextToken);
+      localStorage.setItem('shieldride_auth_user', JSON.stringify(nextUser));
+    } catch {
+      // Ignore storage errors
     }
-    setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (_mobile: string, otp: string): Promise<boolean> => {
-    // Mock login - accepts any 6-digit OTP
-    if (otp.length === 6 && /^\d{6}$/.test(otp)) {
-      setUser(MOCK_USER);
+  const clearAuth = useCallback(() => {
+    setUserState(null);
+    setToken(null);
+    try {
+      localStorage.removeItem('shieldride_auth_token');
+      localStorage.removeItem('shieldride_auth_user');
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    const boot = async () => {
       try {
-        localStorage.setItem('shieldride_auth', JSON.stringify(MOCK_USER));
+        const storedToken = localStorage.getItem('shieldride_auth_token');
+        if (!storedToken) {
+          setIsLoading(false);
+          return;
+        }
+
+        setToken(storedToken);
+        const profile = await apiClient.getMe(storedToken);
+        setUserState(profile.user);
+      } catch {
+        clearAuth();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    boot();
+  }, [clearAuth]);
+
+  const riderSignIn = useCallback(async (mobile: string, password: string): Promise<RiderUser> => {
+    const response = await apiClient.riderLogin(mobile, password);
+    persistAuth(response.user, response.token);
+    return response.user;
+  }, [persistAuth]);
+
+  const riderSignUp = useCallback(async (payload: {
+    name: string;
+    mobile: string;
+    password: string;
+    plan: 'basic' | 'standard' | 'premium';
+    hubId?: string;
+    partnerId?: string;
+    location?: { lat: number; lng: number };
+  }): Promise<RiderUser> => {
+    const response = await apiClient.riderSignup(payload);
+    persistAuth(response.user, response.token);
+    return response.user;
+  }, [persistAuth]);
+
+  const insurerSignIn = useCallback(async (email: string, password: string): Promise<AuthUser> => {
+    const response = await apiClient.insurerLogin(email, password);
+    persistAuth(response.user, response.token);
+    return response.user;
+  }, [persistAuth]);
+
+  const refreshUser = useCallback(async () => {
+    if (!token) return;
+    try {
+      const profile = await apiClient.getMe(token);
+      setUserState(profile.user);
+      try {
+        localStorage.setItem('shieldride_auth_user', JSON.stringify(profile.user));
       } catch {
         // Ignore storage errors
       }
-      return true;
+    } catch {
+      clearAuth();
     }
-    return false;
-  }, []);
+  }, [clearAuth, token]);
 
   const logout = useCallback(() => {
-    setUser(null);
-    localStorage.removeItem('shieldride_auth');
-  }, []);
+    clearAuth();
+  }, [clearAuth]);
 
-  const updateUser = useCallback((updates: Partial<MockUser>) => {
-    setUser(prev => {
-      if (!prev) return null;
-      const updatedUser = { ...prev, ...updates };
-      try {
-        localStorage.setItem('shieldride_auth', JSON.stringify(updatedUser));
-      } catch {
-        // Ignore storage errors
-      }
-      return updatedUser;
-    });
+  const setUser = useCallback((nextUser: AuthUser) => {
+    setUserState(nextUser);
+    try {
+      localStorage.setItem('shieldride_auth_user', JSON.stringify(nextUser));
+    } catch {
+      // Ignore storage errors
+    }
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        token,
         isAuthenticated: !!user,
         isLoading,
-        login,
+        riderSignIn,
+        riderSignUp,
+        insurerSignIn,
+        refreshUser,
+        setUser,
         logout,
-        updateUser,
       }}
     >
       {children}

@@ -9,9 +9,9 @@ interface CardProps {
 }
 
 const variantStyles = {
-  default: 'bg-gray-800/50 border border-gray-700/50',
-  gradient: 'bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-blue-500/30',
-  glass: 'bg-white/5 backdrop-blur-lg border border-white/10',
+  default: 'sr-card-default',
+  gradient: 'sr-card-gradient',
+  glass: 'sr-card-glass',
 };
 
 export function Card({ children, className = '', onClick, variant = 'default' }: CardProps) {

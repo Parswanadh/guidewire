@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Phone, Shield } from 'lucide-react';
+import { ArrowLeft, Phone, Shield, Building2 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -11,16 +11,14 @@ import { useAuth } from '../context/AuthContext';
 export default function LoginScreen() {
   const { t, strings } = useI18n();
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { riderSignIn } = useAuth();
 
-  const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
   const [mobile, setMobile] = useState('');
-  const [otp, setOtp] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [countdown, setCountdown] = useState(30);
 
-  const handleMobileSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -29,58 +27,24 @@ export default function LoginScreen() {
       return;
     }
 
-    setIsLoading(true);
-    // Simulate OTP sending
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setStep('otp');
-    startCountdown();
-  };
-
-  const startCountdown = () => {
-    setCountdown(30);
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (otp.length !== 6) {
-      setError(t.invalidOtp);
+    if (password.length < 6) {
+      setError('Password should be at least 6 characters');
       return;
     }
 
-    setIsLoading(true);
-    const success = await login(mobile, otp);
-    setIsLoading(false);
-
-    if (success) {
-      navigate('/location');
-    } else {
-      setError(t.invalidOtp);
+    try {
+      setIsLoading(true);
+      const rider = await riderSignIn(mobile, password);
+      navigate(rider.darkStore ? '/home' : '/location');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to sign in');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleResendOtp = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    startCountdown();
-    setOtp('');
-    setError('');
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#020617] flex flex-col">
+    <div className="min-h-screen sr-screen-auth flex flex-col">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -89,6 +53,7 @@ export default function LoginScreen() {
       >
         <button
           onClick={() => navigate(-1)}
+          aria-label="Go back"
           className="p-2 hover:bg-white/10 rounded-xl transition-colors"
         >
           <ArrowLeft className="w-6 h-6 text-white" />
@@ -102,7 +67,7 @@ export default function LoginScreen() {
         className="flex-1 px-6 pb-8 flex flex-col justify-center max-w-md mx-auto w-full"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 sr-brand-mark rounded-2xl mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">{t.login}</h1>
@@ -110,79 +75,48 @@ export default function LoginScreen() {
         </div>
 
         <Card variant="glass" className="p-6">
-          {step === 'mobile' ? (
-            <form onSubmit={handleMobileSubmit} className="space-y-4">
-              <Input
-                label={t.mobileNumber}
-                type="tel"
-                maxLength={10}
-                placeholder="9876543210"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                leftIcon={<Phone className="w-5 h-5" />}
-                error={error}
-                autoFocus
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                isLoading={isLoading}
-                disabled={mobile.length !== 10}
-                fullWidth
-                size="lg"
-              >
-                {t.sendOtp}
-              </Button>
-              <p className="text-center text-xs text-blue-400/60 mt-2">
-                {t.loginNote}
-              </p>
-            </form>
-          ) : (
-            <form onSubmit={handleOtpSubmit} className="space-y-4">
-              <div className="text-center mb-4">
-                <p className="text-gray-400 mb-1">{t.otpSent} +91 {mobile}</p>
-                <button
-                  type="button"
-                  onClick={() => setStep('mobile')}
-                  className="text-blue-400 text-sm hover:underline"
-                >
-                  Change number
-                </button>
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label={t.mobileNumber}
+              type="tel"
+              autoComplete="tel-national"
+              maxLength={10}
+              placeholder="9876543210"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+              leftIcon={<Phone className="w-5 h-5" />}
+              autoFocus
+            />
 
-              <Input
-                label={t.enterOtp}
-                type="text"
-                maxLength={6}
-                placeholder="123456"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                error={error}
-                autoFocus
-                className="text-center text-2xl tracking-widest"
-              />
+            <Input
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={error}
+            />
 
-              <Button
-                type="submit"
-                variant="primary"
-                isLoading={isLoading}
-                disabled={otp.length !== 6}
-                fullWidth
-                size="lg"
-              >
-                {t.verifyOtp}
-              </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isLoading}
+              disabled={mobile.length !== 10 || password.length < 6}
+              fullWidth
+              size="lg"
+            >
+              {t.login}
+            </Button>
+          </form>
 
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                disabled={countdown > 0 || isLoading}
-                className="w-full text-center text-blue-400 text-sm hover:underline disabled:text-gray-500 disabled:no-underline"
-              >
-                {countdown > 0 ? `${t.resendOtp} in ${countdown}s` : t.resendOtp}
-              </button>
-            </form>
-          )}
+          <button
+            onClick={() => navigate('/insurer-login')}
+            className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-3 py-2 text-sm text-indigo-300 hover:bg-indigo-500/20 transition-colors"
+          >
+            <Building2 className="w-4 h-4" />
+            Sign in as Insurer
+          </button>
         </Card>
 
         <p className="text-center text-gray-500 text-sm mt-6">

@@ -35,10 +35,14 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const t = strings;
 
   useEffect(() => {
-    // Update font family and lang attribute based on language
+    // Update language attributes and typography variables for each locale.
     if (typeof document !== 'undefined') {
       document.body.style.fontFamily = config.fontFamily;
+      document.body.style.setProperty('--sr-font-body', config.fontFamily);
+      document.body.style.setProperty('--sr-font-display', config.displayFontFamily);
+      document.body.dataset.language = language;
       document.documentElement.lang = language.split('-')[0];
+      document.documentElement.dir = config.direction;
     }
   }, [config, language]);
 

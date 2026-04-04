@@ -6,6 +6,8 @@ import { useI18n } from '../../context/LanguageContext';
 
 interface FraudFeedProps {
   alerts: FraudAlert[];
+  provenance?: string;
+  actionHint?: string;
 }
 
 const riskColors = {
@@ -14,7 +16,7 @@ const riskColors = {
   low: 'bg-green-500/20 border-green-500/30 text-green-400',
 };
 
-export function FraudFeed({ alerts }: FraudFeedProps) {
+export function FraudFeed({ alerts, provenance, actionHint }: FraudFeedProps) {
   const { strings } = useI18n();
 
   return (
@@ -26,6 +28,16 @@ export function FraudFeed({ alerts }: FraudFeedProps) {
         <h3 className="text-white font-semibold">{strings.fraudDetection}</h3>
         <Badge variant="error" size="sm">{alerts.length}</Badge>
       </div>
+
+      {provenance && (
+        <p className="text-[11px] text-gray-500 mb-3">{provenance}</p>
+      )}
+
+      {actionHint && (
+        <div className="mb-3 rounded-lg border border-blue-500/20 bg-blue-500/10 p-2 text-xs text-blue-200">
+          {actionHint}
+        </div>
+      )}
 
       <div className="space-y-3">
         {alerts.map((alert) => (
